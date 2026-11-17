@@ -1,0 +1,39 @@
+.tools/
+logs/
+db/*.sqlite*
+
+# Dependencies and generated output
+node_modules/
+dist/
+target/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local data, logs and backup archives
+db/*
+!db/.gitkeep
+*.log
+*.pid
+*.rar
+*.zip
+*.7z
+project/local/
+project/runtime/
+project/public-repo/
+
+# Private source materials and local reviews
+project/files/sources/
+project/files/archive/
+project/files/current/
+outputs/
+audit/
+__pycache__/
+*.pyc

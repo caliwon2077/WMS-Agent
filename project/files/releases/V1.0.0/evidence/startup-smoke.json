@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-17",
+  "version": "V1.0.0",
+  "scope": "fresh public snapshot, synthetic database, no model credential, no external model request",
+  "checks": [
+    {
+      "name": "unauthenticated request rejected",
+      "passed": true
+    },
+    {
+      "name": "release version V1.0.0",
+      "passed": true
+    },
+    {
+      "name": "no credential included",
+      "passed": true
+    },
+    {
+      "name": "12 factories",
+      "passed": true
+    },
+    {
+      "name": "fresh database has 432 assets",
+      "passed": true
+    },
+    {
+      "name": "48 unfinished plans",
+      "passed": true
+    },
+    {
+      "name": "F03 October starts without confirmed snapshot",
+      "passed": true
+    },
+    {
+      "name": "frontend ready",
+      "passed": true
+    },
+    {
+      "name": "frontend proxy reaches backend",
+      "passed": true
+    },
+    {
+      "name": "missing model key produces explicit failure",
+      "passed": true
+    }
+  ],
+  "passed": 10,
+  "failed": 0
+}

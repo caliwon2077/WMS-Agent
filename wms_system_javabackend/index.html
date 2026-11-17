@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>HL-3 控制大厅数字孪生系统｜交互原型</title>
+  <style>
+    :root {
+      --cyan: rgba(0, 205, 255, .9);
+      --cyan-soft: rgba(0, 180, 255, .16);
+      --yellow: rgba(255, 202, 71, .95);
+      --yellow-soft: rgba(255, 184, 0, .16);
+      --panel: rgba(3, 14, 32, .72);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #020712;
+      color: #d8f5ff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      overflow: hidden;
+    }
+    body { display: grid; place-items: center; }
+    .stage {
+      position: relative;
+      width: min(100vw, 2048px);
+      aspect-ratio: 4 / 1;
+      max-height: 100vh;
+      background: #020712;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 136, 255, .22);
+    }
+    .stage img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .hotspot {
+      position: absolute;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      background: transparent;
+      outline: none;
+      transition: border-color .12s ease, box-shadow .12s ease, background .12s ease, transform .12s ease;
+    }
+    .hotspot:hover, .hotspot:focus-visible, .show-hotspots .hotspot {
+      border-color: var(--cyan);
+      background: var(--cyan-soft);
+      box-shadow: 0 0 18px rgba(0, 208, 255, .42), inset 0 0 12px rgba(0, 208, 255, .25);
+      transform: translateZ(0);
+    }
+    .hotspot.feature:hover, .hotspot.feature:focus-visible, .show-hotspots .hotspot.feature {
+      border-color: var(--yellow);
+      background: var(--yellow-soft);
+      box-shadow: 0 0 18px rgba(255, 193, 7, .42), inset 0 0 12px rgba(255, 193, 7, .22);
+    }
+    .hotspot::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 7px);
+      transform: translateX(-50%);
+      min-width: max-content;
+      max-width: 260px;
+      padding: 5px 9px;
+      border: 1px solid rgba(0, 198, 255, .6);
+      border-radius: 8px;
+      background: rgba(2, 12, 30, .92);
+      color: #e9fbff;
+      font-size: clamp(10px, 0.72vw, 13px);
+      line-height: 1.2;
+      white-space: nowrap;
+      text-shadow: 0 0 8px rgba(0, 211, 255, .8);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .1s ease;
+      z-index: 5;
+    }
+    .hotspot:hover::after, .hotspot:focus-visible::after, .show-hotspots .hotspot::after { opacity: 1; }
+    .hotspot.nav::after { bottom: calc(100% + 9px); }
+    .statusbar {
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 11px;
+      border: 1px solid rgba(0, 186, 255, .25);
+      border-radius: 999px;
+      background: rgba(0, 8, 20, .24);
+      backdrop-filter: blur(6px);
+      font-size: clamp(10px, 0.75vw, 13px);
+      color: rgba(219, 249, 255, .72);
+      opacity: 0;
+      transition: opacity .18s ease;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .stage:hover .statusbar, .show-hotspots .statusbar { opacity: 1; }
+    .statusbar kbd {
+      border: 1px solid rgba(219, 249, 255, .3);
+      border-radius: 5px;
+      padding: 1px 5px;
+      background: rgba(255,255,255,.06);
+      color: rgba(219, 249, 255, .85);
+      font-family: inherit;
+    }
+    .fallback {
+      display: none;
+      position: fixed;
+      inset: 0;
+      padding: 24px;
+      overflow: auto;
+      background: #020712;
+      color: #d8f5ff;
+      line-height: 1.7;
+    }
+    @media (max-aspect-ratio: 4/1) {
+      .stage { width: 100vw; }
+    }
+    @media (min-aspect-ratio: 4/1) {
+      .stage { height: 100vh; width: min(100vw, 400vh); }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" id="stage" aria-label="HL-3 交互原型画布">
+    <img id="screen" alt="HL-3 控制大厅数字孪生系统交互原型页面" />
+    <div id="hotspots" aria-label="交互热区"></div>
+    <div class="statusbar"><span id="screenLabel"></span><span>按 <kbd>H</kbd> 显示/隐藏全部热区</span></div>
+  </main>
+  <noscript>
+    <div class="fallback">此交互原型需要启用 JavaScript。请在浏览器中允许 JavaScript 后重新打开。</div>
+  </noscript>
+  <script>
+    const screens = {"home": {"src": "assets/home.jpg", "label": "1 首页"}, "home2": {"src": "assets/home2.jpg", "label": "1 首页 / 曲线弹窗"}, "home3": {"src": "assets/home3.jpg", "label": "1 首页 / 线框模式"}, "home4": {"src": "assets/home4.jpg", "label": "1 首页 / 半透明填充模式"}, "sync1": {"src": "assets/sync1.png", "label": "2 多源数据同步 / 实时模式"}, "sync2": {"src": "assets/sync2.png", "label": "2 多源数据同步 / 历史回放模式"}, "discharge": {"src": "assets/discharge.png", "label": "3 放电可视化"}, "status": {"src": "assets/status.png", "label": "4 状态监控"}, "warning": {"src": "assets/warning.png", "label": "5 智能预警"}, "backend": {"src": "assets/backend.png", "label": "6 后台编辑模块"}, "tour": {"src": "assets/tour.png", "label": "7 领导参观模式"}, "ops": {"src": "assets/ops.png", "label": "8 智能运维"}, "backend_rule": {"src": "assets/backend_rule.png", "label": "6 后台编辑模块 / 联动规则自定义"}, "backend_model": {"src": "assets/backend_model.png", "label": "6 后台编辑模块 / 模型与资源管理"}, "backend_setting": {"src": "assets/backend_setting.png", "label": "6 后台编辑模块 / 系统设置"}, "backend_3d": {"src": "assets/backend_3d.png", "label": "6 后台编辑模块 / 3D 场景创作"}, "backend_log": {"src": "assets/backend_log.png", "label": "6 后台编辑模块 / 操作日志管理"}, "backend_metric": {"src": "assets/backend_metric.png", "label": "6 后台编辑模块 / 监测指标配置"}, "warning_pattern": {"src": "assets/warning_pattern.png", "label": "5 智能预警 / 典型异常模式"}, "warning_expert": {"src": "assets/warning_expert.png", "label": "5 智能预警 / 专家经验"}, "warning_standard": {"src": "assets/warning_standard.png", "label": "5 智能预警 / 标准处置流程"}};
+    const hotspotConfig = {"home": [{"x": 17.1875, "y": 88.671875, "w": 7.32421875, "h": 9.765625, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 25.0, "y": 88.671875, "w": 8.154296875, "h": 9.765625, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 33.984375, "y": 88.671875, "w": 7.666015625, "h": 9.765625, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 42.3828125, "y": 88.671875, "w": 8.7890625, "h": 9.765625, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 51.953125, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 60.3515625, "y": 88.671875, "w": 8.0078125, "h": 9.765625, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 69.3359375, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.978515625, "y": 88.671875, "w": 7.568359375, "h": 9.765625, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 78.125, "y": 77.734375, "w": 4.8828125, "h": 6.8359375, "target": "home2", "label": "生成曲线 → 1首页2", "kind": "feature"}, {"x": 92.529296875, "y": 69.53125, "w": 5.859375, "h": 7.2265625, "target": "home3", "label": "线框模式 → 1首页3", "kind": "feature"}, {"x": 92.529296875, "y": 77.9296875, "w": 6.689453125, "h": 7.421875, "target": "home4", "label": "半透明填充模式 → 1首页4", "kind": "feature"}], "home2": [{"x": 17.1875, "y": 88.671875, "w": 7.32421875, "h": 9.765625, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 25.0, "y": 88.671875, "w": 8.154296875, "h": 9.765625, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 33.984375, "y": 88.671875, "w": 7.666015625, "h": 9.765625, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 42.3828125, "y": 88.671875, "w": 8.7890625, "h": 9.765625, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 51.953125, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 60.3515625, "y": 88.671875, "w": 8.0078125, "h": 9.765625, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 69.3359375, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.978515625, "y": 88.671875, "w": 7.568359375, "h": 9.765625, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 73.92578125, "y": 10.9375, "w": 1.3671875, "h": 5.46875, "target": "home", "label": "关闭弹窗 → 首页", "kind": "feature"}], "home3": [{"x": 17.1875, "y": 88.671875, "w": 7.32421875, "h": 9.765625, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 25.0, "y": 88.671875, "w": 8.154296875, "h": 9.765625, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 33.984375, "y": 88.671875, "w": 7.666015625, "h": 9.765625, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 42.3828125, "y": 88.671875, "w": 8.7890625, "h": 9.765625, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 51.953125, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 60.3515625, "y": 88.671875, "w": 8.0078125, "h": 9.765625, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 69.3359375, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.978515625, "y": 88.671875, "w": 7.568359375, "h": 9.765625, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 78.125, "y": 77.734375, "w": 4.8828125, "h": 6.8359375, "target": "home2", "label": "生成曲线 → 1首页2", "kind": "feature"}, {"x": 92.529296875, "y": 69.53125, "w": 5.859375, "h": 7.2265625, "target": "home3", "label": "线框模式 → 1首页3", "kind": "feature"}, {"x": 92.529296875, "y": 77.9296875, "w": 6.689453125, "h": 7.421875, "target": "home4", "label": "半透明填充模式 → 1首页4", "kind": "feature"}], "home4": [{"x": 17.1875, "y": 88.671875, "w": 7.32421875, "h": 9.765625, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 25.0, "y": 88.671875, "w": 8.154296875, "h": 9.765625, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 33.984375, "y": 88.671875, "w": 7.666015625, "h": 9.765625, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 42.3828125, "y": 88.671875, "w": 8.7890625, "h": 9.765625, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 51.953125, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 60.3515625, "y": 88.671875, "w": 8.0078125, "h": 9.765625, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 69.3359375, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.978515625, "y": 88.671875, "w": 7.568359375, "h": 9.765625, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 78.125, "y": 77.734375, "w": 4.8828125, "h": 6.8359375, "target": "home2", "label": "生成曲线 → 1首页2", "kind": "feature"}, {"x": 92.529296875, "y": 69.53125, "w": 5.859375, "h": 7.2265625, "target": "home3", "label": "线框模式 → 1首页3", "kind": "feature"}, {"x": 92.529296875, "y": 77.9296875, "w": 6.689453125, "h": 7.421875, "target": "home4", "label": "半透明填充模式 → 1首页4", "kind": "feature"}], "sync1": [{"x": 9.521484375, "y": 88.671875, "w": 8.10546875, "h": 9.765625, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 18.45703125, "y": 88.671875, "w": 9.66796875, "h": 9.765625, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 29.1015625, "y": 88.671875, "w": 9.814453125, "h": 9.765625, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 39.74609375, "y": 88.671875, "w": 9.86328125, "h": 9.765625, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 50.048828125, "y": 88.671875, "w": 9.27734375, "h": 9.765625, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 59.716796875, "y": 88.671875, "w": 9.814453125, "h": 9.765625, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 70.80078125, "y": 88.671875, "w": 8.30078125, "h": 9.765625, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 79.443359375, "y": 88.671875, "w": 9.423828125, "h": 9.765625, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.9765625, "y": 14.0625, "w": 11.62109375, "h": 7.03125, "target": "sync1", "label": "实时模式 → 2多源数据同步1", "kind": "feature"}, {"x": 0.9765625, "y": 22.0703125, "w": 11.62109375, "h": 7.421875, "target": "sync2", "label": "历史回放模式 → 2多源数据同步2", "kind": "feature"}], "sync2": [{"x": 9.521484375, "y": 88.671875, "w": 8.10546875, "h": 9.765625, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 18.45703125, "y": 88.671875, "w": 9.66796875, "h": 9.765625, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 29.1015625, "y": 88.671875, "w": 9.814453125, "h": 9.765625, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 39.74609375, "y": 88.671875, "w": 9.86328125, "h": 9.765625, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 50.048828125, "y": 88.671875, "w": 9.27734375, "h": 9.765625, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 59.716796875, "y": 88.671875, "w": 9.814453125, "h": 9.765625, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 70.80078125, "y": 88.671875, "w": 8.30078125, "h": 9.765625, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 79.443359375, "y": 88.671875, "w": 9.423828125, "h": 9.765625, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.9765625, "y": 14.0625, "w": 11.62109375, "h": 7.03125, "target": "sync1", "label": "实时模式 → 2多源数据同步1", "kind": "feature"}, {"x": 0.9765625, "y": 22.0703125, "w": 11.62109375, "h": 7.421875, "target": "sync2", "label": "历史回放模式 → 2多源数据同步2", "kind": "feature"}], "discharge": [{"x": 14.6484375, "y": 88.671875, "w": 6.8359375, "h": 9.765625, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 22.36328125, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 31.34765625, "y": 88.671875, "w": 7.71484375, "h": 9.765625, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 39.84375, "y": 88.671875, "w": 8.3984375, "h": 9.765625, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.072265625, "y": 88.671875, "w": 8.10546875, "h": 9.765625, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.0078125, "y": 88.671875, "w": 8.203125, "h": 9.765625, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 66.89453125, "y": 88.671875, "w": 7.421875, "h": 9.765625, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 75.048828125, "y": 88.671875, "w": 7.8125, "h": 9.765625, "target": "ops", "label": "8 智能运维", "kind": "nav"}], "status": [{"x": 12.841796875, "y": 88.8671875, "w": 7.91015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 22.119140625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 32.080078125, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 41.50390625, "y": 88.8671875, "w": 7.71484375, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 50.48828125, "y": 88.8671875, "w": 7.71484375, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 59.27734375, "y": 88.8671875, "w": 7.421875, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.87109375, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 76.904296875, "y": 88.8671875, "w": 7.470703125, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}], "warning": [{"x": 4.6875, "y": 88.8671875, "w": 8.984375, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 14.55078125, "y": 88.8671875, "w": 9.27734375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 24.365234375, "y": 88.8671875, "w": 9.521484375, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 34.66796875, "y": 88.8671875, "w": 8.935546875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 44.384765625, "y": 88.8671875, "w": 10.546875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 55.76171875, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 65.4296875, "y": 88.8671875, "w": 8.69140625, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 75.0, "y": 88.8671875, "w": 10.15625, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 67.9, "y": 9.6, "w": 3.7, "h": 5.3, "target": "warning", "label": "历史故障案例", "kind": "feature"}, {"x": 71.8, "y": 9.6, "w": 3.8, "h": 5.3, "target": "warning_pattern", "label": "典型异常模式", "kind": "feature"}, {"x": 75.8, "y": 9.6, "w": 3.5, "h": 5.3, "target": "warning_expert", "label": "专家经验", "kind": "feature"}, {"x": 79.4, "y": 9.6, "w": 4.1, "h": 5.3, "target": "warning_standard", "label": "标准处置流程", "kind": "feature"}], "backend": [{"x": 12.548828125, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 21.19140625, "y": 88.8671875, "w": 8.349609375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 30.56640625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 40.185546875, "y": 88.8671875, "w": 8.154296875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.12109375, "y": 88.8671875, "w": 8.544921875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.59375, "y": 88.8671875, "w": 8.251953125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.7734375, "y": 88.8671875, "w": 8.3984375, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.34375, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.35, "y": 16.8, "w": 6.95, "h": 7.7, "target": "backend", "label": "模板管理 → 后台编辑模块", "kind": "feature"}, {"x": 0.35, "y": 24.6, "w": 6.95, "h": 8.0, "target": "backend_metric", "label": "监测指标配置", "kind": "feature"}, {"x": 0.35, "y": 32.7, "w": 6.95, "h": 8.0, "target": "backend_rule", "label": "联动规则自定义", "kind": "feature"}, {"x": 0.35, "y": 40.8, "w": 6.95, "h": 8.0, "target": "backend_model", "label": "模型与资源管理", "kind": "feature"}, {"x": 0.35, "y": 48.9, "w": 6.95, "h": 8.3, "target": "backend_3d", "label": "3D 场景创作", "kind": "feature"}, {"x": 0.35, "y": 57.3, "w": 6.95, "h": 8.3, "target": "backend_log", "label": "操作日志管理", "kind": "feature"}, {"x": 0.35, "y": 65.8, "w": 6.95, "h": 8.3, "target": "backend_setting", "label": "系统设置", "kind": "feature"}], "tour": [{"x": 23.779296875, "y": 88.8671875, "w": 6.884765625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 31.25, "y": 88.8671875, "w": 7.12890625, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 39.2578125, "y": 88.8671875, "w": 7.32421875, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 47.36328125, "y": 88.8671875, "w": 6.93359375, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 55.078125, "y": 88.8671875, "w": 7.373046875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 63.232421875, "y": 88.8671875, "w": 6.25, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 69.7265625, "y": 88.8671875, "w": 6.34765625, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 76.953125, "y": 88.8671875, "w": 6.640625, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}], "ops": [{"x": 16.357421875, "y": 88.8671875, "w": 8.10546875, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 25.29296875, "y": 88.8671875, "w": 8.203125, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 34.375, "y": 88.8671875, "w": 8.984375, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 44.140625, "y": 88.8671875, "w": 8.30078125, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 53.3203125, "y": 88.8671875, "w": 8.49609375, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 62.744140625, "y": 88.8671875, "w": 8.203125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 71.6796875, "y": 88.8671875, "w": 7.421875, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 79.98046875, "y": 88.8671875, "w": 7.373046875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}], "backend_rule": [{"x": 12.548828125, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 21.19140625, "y": 88.8671875, "w": 8.349609375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 30.56640625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 40.185546875, "y": 88.8671875, "w": 8.154296875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.12109375, "y": 88.8671875, "w": 8.544921875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.59375, "y": 88.8671875, "w": 8.251953125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.7734375, "y": 88.8671875, "w": 8.3984375, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.34375, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.35, "y": 16.8, "w": 6.95, "h": 7.7, "target": "backend", "label": "模板管理 → 后台编辑模块", "kind": "feature"}, {"x": 0.35, "y": 24.6, "w": 6.95, "h": 8.0, "target": "backend_metric", "label": "监测指标配置", "kind": "feature"}, {"x": 0.35, "y": 32.7, "w": 6.95, "h": 8.0, "target": "backend_rule", "label": "联动规则自定义", "kind": "feature"}, {"x": 0.35, "y": 40.8, "w": 6.95, "h": 8.0, "target": "backend_model", "label": "模型与资源管理", "kind": "feature"}, {"x": 0.35, "y": 48.9, "w": 6.95, "h": 8.3, "target": "backend_3d", "label": "3D 场景创作", "kind": "feature"}, {"x": 0.35, "y": 57.3, "w": 6.95, "h": 8.3, "target": "backend_log", "label": "操作日志管理", "kind": "feature"}, {"x": 0.35, "y": 65.8, "w": 6.95, "h": 8.3, "target": "backend_setting", "label": "系统设置", "kind": "feature"}], "backend_model": [{"x": 12.548828125, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 21.19140625, "y": 88.8671875, "w": 8.349609375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 30.56640625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 40.185546875, "y": 88.8671875, "w": 8.154296875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.12109375, "y": 88.8671875, "w": 8.544921875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.59375, "y": 88.8671875, "w": 8.251953125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.7734375, "y": 88.8671875, "w": 8.3984375, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.34375, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.35, "y": 16.8, "w": 6.95, "h": 7.7, "target": "backend", "label": "模板管理 → 后台编辑模块", "kind": "feature"}, {"x": 0.35, "y": 24.6, "w": 6.95, "h": 8.0, "target": "backend_metric", "label": "监测指标配置", "kind": "feature"}, {"x": 0.35, "y": 32.7, "w": 6.95, "h": 8.0, "target": "backend_rule", "label": "联动规则自定义", "kind": "feature"}, {"x": 0.35, "y": 40.8, "w": 6.95, "h": 8.0, "target": "backend_model", "label": "模型与资源管理", "kind": "feature"}, {"x": 0.35, "y": 48.9, "w": 6.95, "h": 8.3, "target": "backend_3d", "label": "3D 场景创作", "kind": "feature"}, {"x": 0.35, "y": 57.3, "w": 6.95, "h": 8.3, "target": "backend_log", "label": "操作日志管理", "kind": "feature"}, {"x": 0.35, "y": 65.8, "w": 6.95, "h": 8.3, "target": "backend_setting", "label": "系统设置", "kind": "feature"}], "backend_setting": [{"x": 12.548828125, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 21.19140625, "y": 88.8671875, "w": 8.349609375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 30.56640625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 40.185546875, "y": 88.8671875, "w": 8.154296875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.12109375, "y": 88.8671875, "w": 8.544921875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.59375, "y": 88.8671875, "w": 8.251953125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.7734375, "y": 88.8671875, "w": 8.3984375, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.34375, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.35, "y": 16.8, "w": 6.95, "h": 7.7, "target": "backend", "label": "模板管理 → 后台编辑模块", "kind": "feature"}, {"x": 0.35, "y": 24.6, "w": 6.95, "h": 8.0, "target": "backend_metric", "label": "监测指标配置", "kind": "feature"}, {"x": 0.35, "y": 32.7, "w": 6.95, "h": 8.0, "target": "backend_rule", "label": "联动规则自定义", "kind": "feature"}, {"x": 0.35, "y": 40.8, "w": 6.95, "h": 8.0, "target": "backend_model", "label": "模型与资源管理", "kind": "feature"}, {"x": 0.35, "y": 48.9, "w": 6.95, "h": 8.3, "target": "backend_3d", "label": "3D 场景创作", "kind": "feature"}, {"x": 0.35, "y": 57.3, "w": 6.95, "h": 8.3, "target": "backend_log", "label": "操作日志管理", "kind": "feature"}, {"x": 0.35, "y": 65.8, "w": 6.95, "h": 8.3, "target": "backend_setting", "label": "系统设置", "kind": "feature"}], "backend_3d": [{"x": 12.548828125, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 21.19140625, "y": 88.8671875, "w": 8.349609375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 30.56640625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 40.185546875, "y": 88.8671875, "w": 8.154296875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.12109375, "y": 88.8671875, "w": 8.544921875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.59375, "y": 88.8671875, "w": 8.251953125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.7734375, "y": 88.8671875, "w": 8.3984375, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.34375, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.35, "y": 16.8, "w": 6.95, "h": 7.7, "target": "backend", "label": "模板管理 → 后台编辑模块", "kind": "feature"}, {"x": 0.35, "y": 24.6, "w": 6.95, "h": 8.0, "target": "backend_metric", "label": "监测指标配置", "kind": "feature"}, {"x": 0.35, "y": 32.7, "w": 6.95, "h": 8.0, "target": "backend_rule", "label": "联动规则自定义", "kind": "feature"}, {"x": 0.35, "y": 40.8, "w": 6.95, "h": 8.0, "target": "backend_model", "label": "模型与资源管理", "kind": "feature"}, {"x": 0.35, "y": 48.9, "w": 6.95, "h": 8.3, "target": "backend_3d", "label": "3D 场景创作", "kind": "feature"}, {"x": 0.35, "y": 57.3, "w": 6.95, "h": 8.3, "target": "backend_log", "label": "操作日志管理", "kind": "feature"}, {"x": 0.35, "y": 65.8, "w": 6.95, "h": 8.3, "target": "backend_setting", "label": "系统设置", "kind": "feature"}], "backend_log": [{"x": 12.548828125, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 21.19140625, "y": 88.8671875, "w": 8.349609375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 30.56640625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 40.185546875, "y": 88.8671875, "w": 8.154296875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.12109375, "y": 88.8671875, "w": 8.544921875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.59375, "y": 88.8671875, "w": 8.251953125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.7734375, "y": 88.8671875, "w": 8.3984375, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.34375, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.35, "y": 16.8, "w": 6.95, "h": 7.7, "target": "backend", "label": "模板管理 → 后台编辑模块", "kind": "feature"}, {"x": 0.35, "y": 24.6, "w": 6.95, "h": 8.0, "target": "backend_metric", "label": "监测指标配置", "kind": "feature"}, {"x": 0.35, "y": 32.7, "w": 6.95, "h": 8.0, "target": "backend_rule", "label": "联动规则自定义", "kind": "feature"}, {"x": 0.35, "y": 40.8, "w": 6.95, "h": 8.0, "target": "backend_model", "label": "模型与资源管理", "kind": "feature"}, {"x": 0.35, "y": 48.9, "w": 6.95, "h": 8.3, "target": "backend_3d", "label": "3D 场景创作", "kind": "feature"}, {"x": 0.35, "y": 57.3, "w": 6.95, "h": 8.3, "target": "backend_log", "label": "操作日志管理", "kind": "feature"}, {"x": 0.35, "y": 65.8, "w": 6.95, "h": 8.3, "target": "backend_setting", "label": "系统设置", "kind": "feature"}], "backend_metric": [{"x": 12.548828125, "y": 88.8671875, "w": 7.666015625, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 21.19140625, "y": 88.8671875, "w": 8.349609375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 30.56640625, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 40.185546875, "y": 88.8671875, "w": 8.154296875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 49.12109375, "y": 88.8671875, "w": 8.544921875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 58.59375, "y": 88.8671875, "w": 8.251953125, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 67.7734375, "y": 88.8671875, "w": 8.3984375, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 77.34375, "y": 88.8671875, "w": 7.6171875, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 0.35, "y": 16.8, "w": 6.95, "h": 7.7, "target": "backend", "label": "模板管理 → 后台编辑模块", "kind": "feature"}, {"x": 0.35, "y": 24.6, "w": 6.95, "h": 8.0, "target": "backend_metric", "label": "监测指标配置", "kind": "feature"}, {"x": 0.35, "y": 32.7, "w": 6.95, "h": 8.0, "target": "backend_rule", "label": "联动规则自定义", "kind": "feature"}, {"x": 0.35, "y": 40.8, "w": 6.95, "h": 8.0, "target": "backend_model", "label": "模型与资源管理", "kind": "feature"}, {"x": 0.35, "y": 48.9, "w": 6.95, "h": 8.3, "target": "backend_3d", "label": "3D 场景创作", "kind": "feature"}, {"x": 0.35, "y": 57.3, "w": 6.95, "h": 8.3, "target": "backend_log", "label": "操作日志管理", "kind": "feature"}, {"x": 0.35, "y": 65.8, "w": 6.95, "h": 8.3, "target": "backend_setting", "label": "系统设置", "kind": "feature"}], "warning_pattern": [{"x": 4.6875, "y": 88.8671875, "w": 8.984375, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 14.55078125, "y": 88.8671875, "w": 9.27734375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 24.365234375, "y": 88.8671875, "w": 9.521484375, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 34.66796875, "y": 88.8671875, "w": 8.935546875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 44.384765625, "y": 88.8671875, "w": 10.546875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 55.76171875, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 65.4296875, "y": 88.8671875, "w": 8.69140625, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 75.0, "y": 88.8671875, "w": 10.15625, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 67.9, "y": 9.6, "w": 3.7, "h": 5.3, "target": "warning", "label": "历史故障案例", "kind": "feature"}, {"x": 71.8, "y": 9.6, "w": 3.8, "h": 5.3, "target": "warning_pattern", "label": "典型异常模式", "kind": "feature"}, {"x": 75.8, "y": 9.6, "w": 3.5, "h": 5.3, "target": "warning_expert", "label": "专家经验", "kind": "feature"}, {"x": 79.4, "y": 9.6, "w": 4.1, "h": 5.3, "target": "warning_standard", "label": "标准处置流程", "kind": "feature"}], "warning_expert": [{"x": 4.6875, "y": 88.8671875, "w": 8.984375, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 14.55078125, "y": 88.8671875, "w": 9.27734375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 24.365234375, "y": 88.8671875, "w": 9.521484375, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 34.66796875, "y": 88.8671875, "w": 8.935546875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 44.384765625, "y": 88.8671875, "w": 10.546875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 55.76171875, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 65.4296875, "y": 88.8671875, "w": 8.69140625, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 75.0, "y": 88.8671875, "w": 10.15625, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 67.9, "y": 9.6, "w": 3.7, "h": 5.3, "target": "warning", "label": "历史故障案例", "kind": "feature"}, {"x": 71.8, "y": 9.6, "w": 3.8, "h": 5.3, "target": "warning_pattern", "label": "典型异常模式", "kind": "feature"}, {"x": 75.8, "y": 9.6, "w": 3.5, "h": 5.3, "target": "warning_expert", "label": "专家经验", "kind": "feature"}, {"x": 79.4, "y": 9.6, "w": 4.1, "h": 5.3, "target": "warning_standard", "label": "标准处置流程", "kind": "feature"}], "warning_standard": [{"x": 4.6875, "y": 88.8671875, "w": 8.984375, "h": 9.1796875, "target": "home", "label": "1 首页", "kind": "nav"}, {"x": 14.55078125, "y": 88.8671875, "w": 9.27734375, "h": 9.1796875, "target": "sync1", "label": "2 多源数据同步", "kind": "nav"}, {"x": 24.365234375, "y": 88.8671875, "w": 9.521484375, "h": 9.1796875, "target": "discharge", "label": "3 放电可视化", "kind": "nav"}, {"x": 34.66796875, "y": 88.8671875, "w": 8.935546875, "h": 9.1796875, "target": "status", "label": "4 状态监控", "kind": "nav"}, {"x": 44.384765625, "y": 88.8671875, "w": 10.546875, "h": 9.1796875, "target": "warning", "label": "5 智能预警", "kind": "nav"}, {"x": 55.76171875, "y": 88.8671875, "w": 8.837890625, "h": 9.1796875, "target": "backend", "label": "6 后台编辑模块", "kind": "nav"}, {"x": 65.4296875, "y": 88.8671875, "w": 8.69140625, "h": 9.1796875, "target": "tour", "label": "7 领导参观模式", "kind": "nav"}, {"x": 75.0, "y": 88.8671875, "w": 10.15625, "h": 9.1796875, "target": "ops", "label": "8 智能运维", "kind": "nav"}, {"x": 67.9, "y": 9.6, "w": 3.7, "h": 5.3, "target": "warning", "label": "历史故障案例", "kind": "feature"}, {"x": 71.8, "y": 9.6, "w": 3.8, "h": 5.3, "target": "warning_pattern", "label": "典型异常模式", "kind": "feature"}, {"x": 75.8, "y": 9.6, "w": 3.5, "h": 5.3, "target": "warning_expert", "label": "专家经验", "kind": "feature"}, {"x": 79.4, "y": 9.6, "w": 4.1, "h": 5.3, "target": "warning_standard", "label": "标准处置流程", "kind": "feature"}]};
+    const defaultScreen = 'home';
+    const stage = document.getElementById('stage');
+    const img = document.getElementById('screen');
+    const hotspotLayer = document.getElementById('hotspots');
+    const screenLabel = document.getElementById('screenLabel');
+    let current = defaultScreen;
+
+    function validScreen(id) { return Object.prototype.hasOwnProperty.call(screens, id); }
+
+    function setHash(id) {
+      if (location.hash.slice(1) !== id) location.hash = id;
+      else render(id);
+    }
+
+    function render(id) {
+      if (!validScreen(id)) id = defaultScreen;
+      current = id;
+      const screen = screens[id];
+      img.src = screen.src;
+      img.alt = screen.label + '，HL-3 控制大厅数字孪生系统交互原型截图';
+      screenLabel.textContent = screen.label;
+      hotspotLayer.innerHTML = '';
+      const hs = hotspotConfig[id] || [];
+      hs.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'hotspot ' + (item.kind || '');
+        btn.style.left = item.x + '%';
+        btn.style.top = item.y + '%';
+        btn.style.width = item.w + '%';
+        btn.style.height = item.h + '%';
+        btn.dataset.target = item.target;
+        btn.dataset.label = item.label;
+        btn.setAttribute('aria-label', item.label);
+        btn.addEventListener('click', () => setHash(item.target));
+        hotspotLayer.appendChild(btn);
+      });
+    }
+
+    window.addEventListener('hashchange', () => render(location.hash.slice(1)));
+    document.addEventListener('keydown', (event) => {
+      const key = event.key.toLowerCase();
+      if (key === 'h') stage.classList.toggle('show-hotspots');
+      if (key === 'escape') { stage.classList.remove('show-hotspots'); }
+      // 快捷键 1-8：与下方菜单一致。
+      const shortcuts = ['home','sync1','discharge','status','warning','backend','tour','ops'];
+      if (/^[1-8]$/.test(key)) setHash(shortcuts[Number(key) - 1]);
+    });
+
+    Object.values(screens).forEach(item => { const preload = new Image(); preload.src = item.src; });
+    render(location.hash.slice(1) || defaultScreen);
+  </script>
+</body>
+</html>

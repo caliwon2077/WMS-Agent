@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-17",
+  "version": "V1.0.0",
+  "source": "prepared public repository snapshot",
+  "backend": {
+    "result": "BUILD SUCCESS",
+    "tests": 36,
+    "failures": 0,
+    "errors": 0,
+    "suites": [
+      {
+        "name": "com.wms.backend.DeepSeekClientTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.wms.backend.DemoBusinessTest",
+        "tests": "28",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.wms.backend.SqliteIntegrationTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ]
+  },
+  "frontend": {
+    "install": "npm ci --ignore-scripts",
+    "build": "npm run build",
+    "result": "success",
+    "node": "v24.22.0",
+    "npm": "11.19.1"
+  },
+  "startup": {
+    "date": "2026-11-17",
+    "version": "V1.0.0",
+    "scope": "fresh public snapshot, synthetic database, no model credential, no external model request",
+    "checks": [
+      {
+        "name": "unauthenticated request rejected",
+        "passed": true
+      },
+      {
+        "name": "release version V1.0.0",
+        "passed": true
+      },
+      {
+        "name": "no credential included",
+        "passed": true
+      },
+      {
+        "name": "12 factories",
+        "passed": true
+      },
+      {
+        "name": "fresh database has 432 assets",
+        "passed": true
+      },
+      {
+        "name": "48 unfinished plans",
+        "passed": true
+      },
+      {
+        "name": "F03 October starts without confirmed snapshot",
+        "passed": true
+      },
+      {
+        "name": "frontend ready",
+        "passed": true
+      },
+      {
+        "name": "frontend proxy reaches backend",
+        "passed": true
+      },
+      {
+        "name": "missing model key produces explicit failure",
+        "passed": true
+      }
+    ],
+    "passed": 10,
+    "failed": 0
+  },
+  "prior_real_provider_validation": {
+    "version": "V0.1.0",
+    "date": "2026-11-17",
+    "passed": 55,
+    "failed": 0,
+    "provider": "DeepSeek official API",
+    "model": "deepseek-v4-pro",
+    "note": "Previous core-business validation; not rerun as part of publication.",
+    "source_sha256": "22663b566d539df8c6caf12d1286b8b5f5e7434897fbb5f77bb414f26598450a"
+  }
+}

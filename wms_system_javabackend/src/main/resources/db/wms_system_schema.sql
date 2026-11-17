@@ -1,0 +1,822 @@
+CREATE TABLE IF NOT EXISTS equipment_assets (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  category VARCHAR(100) NOT NULL,
+  workshop VARCHAR(100) NOT NULL,
+  owner VARCHAR(60) NOT NULL,
+  status VARCHAR(40) NOT NULL,
+  purchaseDate DATE NOT NULL,
+  model VARCHAR(100) NULL,
+  supplier VARCHAR(120) NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS manufacturer (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  contact VARCHAR(60) NOT NULL,
+  mobile VARCHAR(30) NOT NULL,
+  email VARCHAR(120) NULL,
+  address VARCHAR(255) NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS equipment_category (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  parentCategory VARCHAR(120) NOT NULL,
+  checkStrategy VARCHAR(100) NOT NULL,
+  maintenanceStrategy VARCHAR(100) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS check_plan (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  target VARCHAR(120) NOT NULL,
+  frequency VARCHAR(40) NOT NULL,
+  executor VARCHAR(60) NOT NULL,
+  status VARCHAR(40) NOT NULL,
+  startDate DATE NOT NULL,
+  cycleRule VARCHAR(120) NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS check_item (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  judgeType VARCHAR(60) NOT NULL,
+  standardValue VARCHAR(120) NOT NULL,
+  equipmentType VARCHAR(120) NOT NULL,
+  riskLevel VARCHAR(20) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS check_record (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  equipmentName VARCHAR(120) NOT NULL,
+  executor VARCHAR(60) NOT NULL,
+  executeTime DATETIME NOT NULL,
+  result VARCHAR(20) NOT NULL,
+  status VARCHAR(40) NOT NULL,
+  planName VARCHAR(120) NULL,
+  abnormalDesc TEXT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS maintenance_plan (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  target VARCHAR(120) NOT NULL,
+  cycle VARCHAR(40) NOT NULL,
+  owner VARCHAR(60) NOT NULL,
+  status VARCHAR(40) NOT NULL,
+  nextDate DATE NOT NULL,
+  strategy VARCHAR(100) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS maintenance_item (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  standardHours VARCHAR(40) NOT NULL,
+  targetType VARCHAR(120) NOT NULL,
+  riskLevel VARCHAR(20) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  executeStandard TEXT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS maintenance_record (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  target VARCHAR(120) NOT NULL,
+  executor VARCHAR(60) NOT NULL,
+  maintainDate DATE NOT NULL,
+  result VARCHAR(20) NOT NULL,
+  status VARCHAR(40) NOT NULL,
+  planName VARCHAR(120) NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS device_model (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  pointCount INT NOT NULL,
+  alarmRuleCount INT NOT NULL,
+  protocol VARCHAR(40) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS iot_device (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  modelName VARCHAR(120) NOT NULL,
+  connectionStatus VARCHAR(20) NOT NULL,
+  lastReportTime DATETIME NOT NULL,
+  owner VARCHAR(60) NOT NULL,
+  ipAddress VARCHAR(64) NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS network_driver (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  protocol VARCHAR(40) NOT NULL,
+  version VARCHAR(40) NOT NULL,
+  vendor VARCHAR(120) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  configTemplate VARCHAR(120) NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS repair_stage (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  sortOrder INT NOT NULL,
+  allowRollback VARCHAR(10) NOT NULL,
+  slaHours VARCHAR(40) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS repair_process (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  scope VARCHAR(120) NOT NULL,
+  nodeCount INT NOT NULL,
+  approvalMode VARCHAR(20) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS material (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  spec VARCHAR(120) NOT NULL,
+  unit VARCHAR(40) NOT NULL,
+  category VARCHAR(80) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS work_area (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  parentArea VARCHAR(120) NOT NULL,
+  owner VARCHAR(60) NOT NULL,
+  equipmentCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS workshop (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  areaName VARCHAR(120) NOT NULL,
+  owner VARCHAR(60) NOT NULL,
+  teamCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS mdm_process (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  standardHours VARCHAR(40) NOT NULL,
+  jobType VARCHAR(80) NOT NULL,
+  equipmentName VARCHAR(120) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS oa_setting (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  currentValue VARCHAR(120) NOT NULL,
+  updatedAtLabel DATE NOT NULL,
+  maintainer VARCHAR(60) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS oa_flow (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  bizType VARCHAR(120) NOT NULL,
+  nodeCount INT NOT NULL,
+  version VARCHAR(40) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS oa_approval_type (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  bindFlow VARCHAR(120) NOT NULL,
+  strategy VARCHAR(80) NOT NULL,
+  modifyCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS accessory_item (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  spec VARCHAR(120) NOT NULL,
+  warehouse VARCHAR(120) NOT NULL,
+  stockQty INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS accessory_category (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  parentCategory VARCHAR(120) NOT NULL,
+  itemCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS accessory_supplier (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  contact VARCHAR(60) NOT NULL,
+  deliveryCycle VARCHAR(60) NOT NULL,
+  grade VARCHAR(20) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS accessory_warehouse (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  zoneCount INT NOT NULL,
+  manager VARCHAR(60) NOT NULL,
+  stockTotal INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS repair_apply (
+  id VARCHAR(64) PRIMARY KEY,
+  ticketNo VARCHAR(64) NOT NULL,
+  equipmentName VARCHAR(120) NOT NULL,
+  level VARCHAR(20) NOT NULL,
+  stage VARCHAR(40) NOT NULL,
+  team VARCHAR(80) NOT NULL,
+  status VARCHAR(40) NOT NULL,
+  applicant VARCHAR(60) NOT NULL,
+  applyDate DATE NOT NULL,
+  faultType VARCHAR(120) NULL,
+  contact VARCHAR(40) NULL,
+  description TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS accessory_apply (
+  id VARCHAR(64) PRIMARY KEY,
+  applyNo VARCHAR(64) NOT NULL,
+  applicant VARCHAR(60) NOT NULL,
+  accessoryName VARCHAR(120) NOT NULL,
+  quantity INT NOT NULL,
+  approvalStatus VARCHAR(40) NOT NULL,
+  deliveryStatus VARCHAR(40) NOT NULL,
+  warehouse VARCHAR(80) NOT NULL,
+  applyDate DATE NOT NULL,
+  purpose VARCHAR(200) NULL,
+  receiver VARCHAR(60) NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_menu (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  type VARCHAR(40) NOT NULL,
+  route VARCHAR(160) NOT NULL,
+  component VARCHAR(200) NOT NULL,
+  sortOrder INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_dict_tree (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  level INT NOT NULL,
+  detailCount INT NOT NULL,
+  modifyCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_setting (
+  id VARCHAR(64) PRIMARY KEY,
+  configKey VARCHAR(120) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  currentValue VARCHAR(120) NOT NULL,
+  category VARCHAR(80) NOT NULL,
+  modifyCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_api_log (
+  id VARCHAR(64) PRIMARY KEY,
+  logNo VARCHAR(64) NOT NULL,
+  apiPath VARCHAR(200) NOT NULL,
+  operator VARCHAR(80) NOT NULL,
+  duration VARCHAR(40) NOT NULL,
+  result VARCHAR(20) NOT NULL,
+  logTime VARCHAR(40) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_quartz (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  cron VARCHAR(120) NOT NULL,
+  lastExecute VARCHAR(40) NOT NULL,
+  result VARCHAR(20) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_org (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  parentOrg VARCHAR(120) NOT NULL,
+  owner VARCHAR(80) NOT NULL,
+  userCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_city (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  province VARCHAR(80) NOT NULL,
+  region VARCHAR(80) NOT NULL,
+  warehouseCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_dict (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  category VARCHAR(80) NOT NULL,
+  itemCount INT NOT NULL,
+  modifyCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_auto_code (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  bizObject VARCHAR(120) NOT NULL,
+  prefix VARCHAR(40) NOT NULL,
+  ruleExample VARCHAR(120) NOT NULL,
+  resetCycle VARCHAR(40) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_common_dict (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  valueType VARCHAR(40) NOT NULL,
+  itemCount INT NOT NULL,
+  modifyCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_role (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  userCount INT NOT NULL,
+  menuCount INT NOT NULL,
+  permissionCount INT NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_dict_item (
+  id VARCHAR(64) PRIMARY KEY,
+  dictName VARCHAR(120) NOT NULL,
+  itemCode VARCHAR(64) NOT NULL,
+  itemName VARCHAR(120) NOT NULL,
+  sortOrder INT NOT NULL,
+  defaultValue VARCHAR(20) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_dept (
+  id VARCHAR(64) PRIMARY KEY,
+  code VARCHAR(64) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  parentDept VARCHAR(120) NOT NULL,
+  owner VARCHAR(80) NOT NULL,
+  syncStatus VARCHAR(40) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_permissions (
+  id VARCHAR(64) PRIMARY KEY,
+  targetName VARCHAR(120) NOT NULL,
+  targetType VARCHAR(40) NOT NULL,
+  menuCount INT NOT NULL,
+  buttonCount INT NOT NULL,
+  lastAdjust DATE NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TABLE IF NOT EXISTS sys_user (
+  id VARCHAR(64) PRIMARY KEY,
+  account VARCHAR(64) NOT NULL,
+  name VARCHAR(60) NOT NULL,
+  dept VARCHAR(100) NOT NULL,
+  role VARCHAR(100) NOT NULL,
+  mobile VARCHAR(30) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  email VARCHAR(120) NULL,
+  syncStatus VARCHAR(40) NULL,
+  remark TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);;
+
+CREATE TRIGGER IF NOT EXISTS equipment_assets_updated_at AFTER UPDATE ON equipment_assets
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE equipment_assets SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS manufacturer_updated_at AFTER UPDATE ON manufacturer
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE manufacturer SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS equipment_category_updated_at AFTER UPDATE ON equipment_category
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE equipment_category SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS check_plan_updated_at AFTER UPDATE ON check_plan
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE check_plan SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS check_item_updated_at AFTER UPDATE ON check_item
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE check_item SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS check_record_updated_at AFTER UPDATE ON check_record
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE check_record SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS maintenance_plan_updated_at AFTER UPDATE ON maintenance_plan
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE maintenance_plan SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS maintenance_item_updated_at AFTER UPDATE ON maintenance_item
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE maintenance_item SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS maintenance_record_updated_at AFTER UPDATE ON maintenance_record
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE maintenance_record SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS device_model_updated_at AFTER UPDATE ON device_model
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE device_model SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS iot_device_updated_at AFTER UPDATE ON iot_device
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE iot_device SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS network_driver_updated_at AFTER UPDATE ON network_driver
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE network_driver SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS repair_stage_updated_at AFTER UPDATE ON repair_stage
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE repair_stage SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS repair_process_updated_at AFTER UPDATE ON repair_process
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE repair_process SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS material_updated_at AFTER UPDATE ON material
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE material SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS work_area_updated_at AFTER UPDATE ON work_area
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE work_area SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS workshop_updated_at AFTER UPDATE ON workshop
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE workshop SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS mdm_process_updated_at AFTER UPDATE ON mdm_process
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE mdm_process SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS oa_setting_updated_at AFTER UPDATE ON oa_setting
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE oa_setting SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS oa_flow_updated_at AFTER UPDATE ON oa_flow
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE oa_flow SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS oa_approval_type_updated_at AFTER UPDATE ON oa_approval_type
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE oa_approval_type SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS accessory_item_updated_at AFTER UPDATE ON accessory_item
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE accessory_item SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS accessory_category_updated_at AFTER UPDATE ON accessory_category
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE accessory_category SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS accessory_supplier_updated_at AFTER UPDATE ON accessory_supplier
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE accessory_supplier SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS accessory_warehouse_updated_at AFTER UPDATE ON accessory_warehouse
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE accessory_warehouse SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS repair_apply_updated_at AFTER UPDATE ON repair_apply
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE repair_apply SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS accessory_apply_updated_at AFTER UPDATE ON accessory_apply
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE accessory_apply SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_menu_updated_at AFTER UPDATE ON sys_menu
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_menu SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_dict_tree_updated_at AFTER UPDATE ON sys_dict_tree
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_dict_tree SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_setting_updated_at AFTER UPDATE ON sys_setting
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_setting SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_api_log_updated_at AFTER UPDATE ON sys_api_log
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_api_log SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_quartz_updated_at AFTER UPDATE ON sys_quartz
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_quartz SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_org_updated_at AFTER UPDATE ON sys_org
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_org SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_city_updated_at AFTER UPDATE ON sys_city
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_city SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_dict_updated_at AFTER UPDATE ON sys_dict
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_dict SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_auto_code_updated_at AFTER UPDATE ON sys_auto_code
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_auto_code SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_common_dict_updated_at AFTER UPDATE ON sys_common_dict
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_common_dict SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_role_updated_at AFTER UPDATE ON sys_role
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_role SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_dict_item_updated_at AFTER UPDATE ON sys_dict_item
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_dict_item SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_dept_updated_at AFTER UPDATE ON sys_dept
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_dept SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_permissions_updated_at AFTER UPDATE ON sys_permissions
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_permissions SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
+
+CREATE TRIGGER IF NOT EXISTS sys_user_updated_at AFTER UPDATE ON sys_user
+FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE sys_user SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;;
